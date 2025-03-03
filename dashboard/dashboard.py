@@ -36,16 +36,16 @@ def main():
     st.sidebar.header("Navigasi")
 
     # Konversi dteday ke datetime
-    if 'dteday_y_x' in merged_data_df.columns:
-        merged_data_df['dteday_y_x'] = pd.to_datetime(merged_data_df['dteday_y_x'], errors='coerce')
-        merged_data_df.dropna(subset=['dteday_y_x'], inplace=True)
+    if 'dteday_x_x' in merged_data_df.columns:
+        merged_data_df['dteday_x_x'] = pd.to_datetime(merged_data_df['dteday_x_x'], errors='coerce')
+        merged_data_df.dropna(subset=['dteday_x_x'], inplace=True)
     else:
-        st.error("Kolom 'dteday_y_x' tidak ditemukan dalam dataset.")
+        st.error("Kolom 'dteday_x_x' tidak ditemukan dalam dataset.")
         return
 
     # Pilihan rentang tanggal
-    min_date = merged_data_df['dteday_y_x'].min().date()
-    max_date = merged_data_df['dteday_y_x'].max().date()
+    min_date = merged_data_df['dteday_x_x'].min().date()
+    max_date = merged_data_df['dteday_x_x'].max().date()
     start_date, end_date = st.sidebar.date_input("Pilih Rentang Tanggal", [min_date, max_date], min_value=min_date, max_value=max_date)
 
     if start_date > end_date:
@@ -53,8 +53,8 @@ def main():
         return
 
     # Filter data berdasarkan rentang tanggal
-    filtered_df = merged_data_df[(merged_data_df['dteday_y_x'] >= pd.to_datetime(start_date)) & 
-                                 (merged_data_df['dteday_y_x'] <= pd.to_datetime(end_date))]
+    filtered_df = merged_data_df[(merged_data_df['dteday_x_x'] >= pd.to_datetime(start_date)) & 
+                                 (merged_data_df['dteday_x_x'] <= pd.to_datetime(end_date))]
     
     if filtered_df.empty:
         st.warning("Tidak ada data setelah diterapkan filter. Silakan ubah filter Anda.")
@@ -66,11 +66,11 @@ def main():
 
     # Visualisasi Tren Harian
     st.subheader("📆 Tren Peminjaman Sepeda Harian")
-    if 'dteday_y_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
-        daily_df = filtered_df.groupby('dteday_y_x')['cnt_y_x'].sum().reset_index()
+    if 'dteday_x_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
+        daily_df = filtered_df.groupby('dteday_x_x')['cnt_y_x'].sum().reset_index()
         
         fig, ax = plt.subplots(figsize=(12, 5))
-        ax.plot(daily_df['dteday_y_x'], daily_df['cnt_y_x'], marker='o', linestyle='-', color='b', label="Total Peminjaman")
+        ax.plot(daily_df['dteday_x_x'], daily_df['cnt_y_x'], marker='o', linestyle='-', color='b', label="Total Peminjaman")
         ax.set_xlabel("Tanggal")
         ax.set_ylabel("Total Peminjaman")
         ax.set_title("Tren Peminjaman Sepeda Harian")
