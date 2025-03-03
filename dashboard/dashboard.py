@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load dataset
-df = pd.read_csv("Bike_Sharing.csv")
+df = pd.read_csv("D:/STUPEN/dashboard_Bike_Sharing/dashboard/Bike_Sharing.csv")
 
 # Membersihkan dataset: Menghapus kolom yang duplikat jika ada
 df = df.loc[:, ~df.columns.duplicated()]
