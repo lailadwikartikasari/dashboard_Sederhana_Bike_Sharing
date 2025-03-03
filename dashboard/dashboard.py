@@ -9,7 +9,7 @@ sns.set(style="whitegrid", context="talk")
 
 # Tentukan path absolut ke file CSV
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.join(BASE_DIR, "Bike_Sharing.csv")
+data_path = os.path.join(BASE_DIR, "merged_data.csv.csv")
 
 def load_data():
     """Load dataset dengan pengecekan error."""
