@@ -28,8 +28,9 @@ def main():
         return
 
     # Sidebar untuk filter interaktif
-    st.sidebar.header("📊 Dashboard Controls")
-    
+    st.sidebar.header("Navigasi")
+    st.sidebar.image("D:/STUPEN/BELAJAR ANALISIS DATA PYTHON/data/logo.jpeg", use_column_width=True)
+
     # Pilihan rentang tanggal
     if 'dteday' in main_data_df.columns:
         main_data_df['dteday'] = pd.to_datetime(main_data_df['dteday'])
