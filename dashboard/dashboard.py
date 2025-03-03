@@ -29,7 +29,7 @@ def main():
 
     # Sidebar untuk filter interaktif
     st.sidebar.header("📊 Dashboard Controls")
-    
+    st.sidebar.image("logo.jpeg", use_column_width=True)
     # Pilihan rentang tanggal
     if 'dteday' in main_data_df.columns:
         main_data_df['dteday'] = pd.to_datetime(main_data_df['dteday'])
