@@ -24,7 +24,7 @@ def load_data():
         return None
 
 def main():
-    st.title("🚴‍♂ Bike Sharing Dashboard")
+    st.title("🚴‍♂️ Bike Sharing Dashboard")
 
     # Load data
     merged_data_df = load_data()
@@ -64,41 +64,33 @@ def main():
     st.subheader("📜 Data Preview")
     st.write(filtered_df.head())
 
-    # Pilihan agregasi
-    agg_option = st.radio("Pilih Metode Agregasi", ["Rata-rata", "Total"], horizontal=True)
-
     # Visualisasi Tren Harian
     st.subheader("📆 Tren Peminjaman Sepeda Harian")
     if 'dteday_y_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
-        daily_df = filtered_df.groupby('dteday_y_x')['cnt_y_x'].mean().reset_index() if agg_option == "Rata-rata" else filtered_df.groupby('dteday')['cnt'].sum().reset_index()
-        y_label = "Rata-rata Peminjaman" if agg_option == "Rata-rata" else "Total Peminjaman"
-
-        if not daily_df.empty:
-            fig, ax = plt.subplots(figsize=(12, 5))
-            ax.plot(daily_df['dteday_y_x'], daily_df['cnt_y_x'], marker='o', linestyle='-', color='b', label=y_label)
-            ax.set_xlabel("Tanggal")
-            ax.set_ylabel(y_label)
-            ax.set_title(f"Tren Peminjaman Sepeda Harian ({agg_option})")
-            ax.legend()
-            plt.xticks(rotation=45)
-            plt.grid()
-            st.pyplot(fig)
-        else:
-            st.warning("Tidak ada data untuk ditampilkan pada rentang tanggal yang dipilih.")
+        daily_df = filtered_df.groupby('dteday_y_x')['cnt_y_x'].sum().reset_index()
+        
+        fig, ax = plt.subplots(figsize=(12, 5))
+        ax.plot(daily_df['dteday_y_x'], daily_df['cnt_y_x'], marker='o', linestyle='-', color='b', label="Total Peminjaman")
+        ax.set_xlabel("Tanggal")
+        ax.set_ylabel("Total Peminjaman")
+        ax.set_title("Tren Peminjaman Sepeda Harian")
+        ax.legend()
+        plt.xticks(rotation=45)
+        plt.grid()
+        st.pyplot(fig)
     else:
         st.warning("Kolom 'dteday' atau 'cnt' tidak ditemukan untuk visualisasi tren harian.")
 
     # Visualisasi Tren Per Jam
     st.subheader("⏰ Tren Peminjaman Sepeda Per Jam")
     if 'hr_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
-        hourly_df = filtered_df.groupby("hr_x")['cnt_y_x'].mean().reset_index() if agg_option == "Rata-rata" else filtered_df.groupby("hr")['cnt'].sum().reset_index()
-        y_label = "Rata-rata Peminjaman" if agg_option == "Rata-rata" else "Total Peminjaman"
-
+        hourly_df = filtered_df.groupby("hr_x")['cnt_y_x'].sum().reset_index()
+        
         fig, ax = plt.subplots(figsize=(10, 5))
         sns.barplot(data=hourly_df, x='hr_x', y='cnt_y_x', palette="viridis", ax=ax)
         ax.set_xlabel("Jam")
-        ax.set_ylabel(y_label)
-        ax.set_title(f"Tren Peminjaman Sepeda Per Jam ({agg_option})")
+        ax.set_ylabel("Total Peminjaman")
+        ax.set_title("Tren Peminjaman Sepeda Per Jam")
         
         for p in ax.patches:
             ax.annotate(f'{int(p.get_height())}', (p.get_x() + p.get_width() / 2., p.get_height()),
@@ -108,10 +100,10 @@ def main():
         plt.grid()
         st.pyplot(fig)
     else:
-        st.warning("Kolom 'hr_xhr' atau 'cnt' tidak ditemukan untuk visualisasi tren per jam.")
+        st.warning("Kolom 'hr_x' atau 'cnt' tidak ditemukan untuk visualisasi tren per jam.")
 
     # Visualisasi pola musiman
-    st.subheader("☁ Apakah ada pola musiman dalam peminjaman sepeda?")
+    st.subheader("☁️ Apakah ada pola musiman dalam peminjaman sepeda?")
     if 'season_x_y' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
         seasonal_trend = filtered_df.groupby("season_x_y")['cnt_y_x'].mean().sort_values()
         fig, ax = plt.subplots(figsize=(8, 5))
@@ -125,5 +117,5 @@ def main():
     else:
         st.warning("Kolom 'season_x_y' atau 'cnt' tidak ditemukan untuk visualisasi pola musiman.")
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     main()
