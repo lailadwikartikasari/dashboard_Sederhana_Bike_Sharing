@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Atur gaya Seaborn
-sns.set_theme(style="whitegrid", context="talk")
+sns.set(style="whitegrid", context="talk")
 
 # Tentukan path absolut ke file CSV dan gambar
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.join(BASE_DIR, "Bike_Sharing.csv")
+BASE_DIR = os.path.dirname(os.path.abspath(_file_))
+data_path = os.path.join(BASE_DIR, "merged_data.csv")
+logo_path = os.path.join(BASE_DIR, 'D:/STUPEN/dashboard_Bike_Sharing/data/logo.jpg')
 
-@st.cache_data
 def load_data():
     """Load dataset dengan pengecekan error."""
     if not os.path.exists(data_path):
@@ -24,98 +24,107 @@ def load_data():
         return None
 
 def main():
-    st.title("🚴‍♂️ Bike Sharing Dashboard")
-
+    st.title("🚴‍♂ Bike Sharing Dashboard")
+    
     # Load data
-    merged_data_df = load_data()
-    if merged_data_df is None or merged_data_df.empty:
-        st.warning("Data tidak tersedia atau kosong.")
+    main_data_df = load_data()
+    if main_data_df is None:
         return
 
     # Sidebar untuk filter interaktif
     st.sidebar.header("Navigasi")
-
-    # Konversi dteday ke datetime
-    if 'dteday_x_x' in merged_data_df.columns:
-        merged_data_df['dteday_x_x'] = pd.to_datetime(merged_data_df['dteday_x_x'], errors='coerce')
-        merged_data_df.dropna(subset=['dteday_x_x'], inplace=True)
-    else:
-        st.error("Kolom 'dteday_x_x' tidak ditemukan dalam dataset.")
-        return
-
-    # Pilihan rentang tanggal
-    min_date = merged_data_df['dteday_x_x'].min().date()
-    max_date = merged_data_df['dteday_x_x'].max().date()
-    start_date, end_date = st.sidebar.date_input("Pilih Rentang Tanggal", [min_date, max_date], min_value=min_date, max_value=max_date)
-
-    if start_date > end_date:
-        st.error("Tanggal mulai tidak boleh lebih besar dari tanggal akhir.")
-        return
-
-    # Filter data berdasarkan rentang tanggal
-    filtered_df = merged_data_df[(merged_data_df['dteday_x_x'] >= pd.to_datetime(start_date)) & 
-                                 (merged_data_df['dteday_x_x'] <= pd.to_datetime(end_date))]
     
-    if filtered_df.empty:
-        st.warning("Tidak ada data setelah diterapkan filter. Silakan ubah filter Anda.")
-        return
+    # Coba tampilkan logo jika ada
+    if os.path.exists(logo_path):
+        st.sidebar.image(logo_path, use_column_width=True)
+    else:
+        st.sidebar.warning("Logo tidak ditemukan!")
+    
+    # Pilihan rentang tanggal
+    if 'dteday' in main_data_df.columns:
+        main_data_df['dteday'] = pd.to_datetime(main_data_df['dteday'])
+        min_date = main_data_df['dteday'].min()
+        max_date = main_data_df['dteday'].max()
+        start_date, end_date = st.sidebar.date_input("Pilih Rentang Tanggal", [min_date, max_date])
+        
+        # Filter data berdasarkan tanggal
+        main_data_df = main_data_df[(main_data_df['dteday'] >= pd.Timestamp(start_date)) & 
+                                    (main_data_df['dteday'] <= pd.Timestamp(end_date))]
 
+    # Pilihan musim (Season)
+    season_mapping = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
+    if 'season' in main_data_df.columns:
+        main_data_df['season_cat'] = main_data_df['season'].map(season_mapping)
+        selected_season = st.sidebar.multiselect("Filter Musim", main_data_df['season_cat'].unique(), default=main_data_df['season_cat'].unique())
+        main_data_df = main_data_df[main_data_df['season_cat'].isin(selected_season)]
+    
     # Tampilkan preview data
     st.subheader("📜 Data Preview")
-    st.write(filtered_df.head())
+    st.write(main_data_df.head())
 
-    # Visualisasi Tren Harian
-    st.subheader("📆 Tren Peminjaman Sepeda Harian")
-    if 'dteday_x_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
-        daily_df = filtered_df.groupby('dteday_x_x')['cnt_y_x'].sum().reset_index()
+    # Visualisasi dan Analisis
+    st.header("🚴‍♂ Rentals by Season & Weather")
+    if 'weathersit' in main_data_df.columns:
+        weathersit_mapping = {1: "Clear", 2: "Mist", 3: "Light Rain/Snow", 4: "Heavy Rain/Snow"}
+        main_data_df['weathersit_cat'] = main_data_df['weathersit'].map(weathersit_mapping)
         
-        fig, ax = plt.subplots(figsize=(12, 5))
-        ax.plot(daily_df['dteday_x_x'], daily_df['cnt_y_x'], marker='o', linestyle='-', color='b', label="Total Peminjaman")
-        ax.set_xlabel("Tanggal")
-        ax.set_ylabel("Total Peminjaman")
-        ax.set_title("Tren Peminjaman Sepeda Harian")
-        ax.legend()
-        plt.xticks(rotation=45)
-        plt.grid()
-        st.pyplot(fig)
-    else:
-        st.warning("Kolom 'dteday' atau 'cnt' tidak ditemukan untuk visualisasi tren harian.")
-
-    # Visualisasi Tren Per Jam
-    st.subheader("⏰ Tren Peminjaman Sepeda Per Jam")
-    if 'hr_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
-        hourly_df = filtered_df.groupby("hr_x")['cnt_y_x'].sum().reset_index()
+        # Pilihan jenis agregasi
+        agg_option = st.radio("Pilih Metode Agregasi", ["Rata-rata", "Total"], horizontal=True)
         
-        fig, ax = plt.subplots(figsize=(10, 5))
-        sns.barplot(data=hourly_df, x='hr_x', y='cnt_y_x', palette="viridis", ax=ax)
-        ax.set_xlabel("Jam")
-        ax.set_ylabel("Total Peminjaman")
-        ax.set_title("Tren Peminjaman Sepeda Per Jam")
-        
-        for p in ax.patches:
-            ax.annotate(f'{int(p.get_height())}', (p.get_x() + p.get_width() / 2., p.get_height()),
-                        ha='center', va='bottom', fontsize=10, color='black', weight='bold')
+        if agg_option == "Rata-rata":
+            agg_df = main_data_df.groupby(['season_cat', 'weathersit_cat'])['cnt'].mean().reset_index()
+            y_label = "Average Rental Count"
+        else:
+            agg_df = main_data_df.groupby(['season_cat', 'weathersit_cat'])['cnt'].sum().reset_index()
+            y_label = "Total Rental Count"
 
-        plt.xticks(hourly_df['hr_x'].unique())
-        plt.grid()
-        st.pyplot(fig)
-    else:
-        st.warning("Kolom 'hr_x' atau 'cnt' tidak ditemukan untuk visualisasi tren per jam.")
-
-    # Visualisasi pola musiman
-    st.subheader("☁️ Apakah ada pola musiman dalam peminjaman sepeda?")
-    if 'season_x_y' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
-        seasonal_trend = filtered_df.groupby("season_x_y")['cnt_y_x'].mean().sort_values()
         fig, ax = plt.subplots(figsize=(8, 5))
-        seasonal_trend.plot(kind='bar', color=['green', 'orange', 'brown', 'blue'], ax=ax)
-        ax.set_xlabel("Musim")
-        ax.set_ylabel("Rata-rata Peminjaman")
-        ax.set_title("Pola Peminjaman Sepeda Berdasarkan Musim")
-        plt.xticks(rotation=45)
-        plt.grid(axis='y')
+        sns.barplot(data=agg_df, x='season_cat', y='cnt', hue='weathersit_cat', palette="viridis", ax=ax)
+        ax.set_xlabel("Season")
+        ax.set_ylabel(y_label)
+        ax.set_title(f"Bike Rentals by Season & Weather ({agg_option})")
+        ax.legend(title="Weather", bbox_to_anchor=(1.05, 1), loc="upper left")
         st.pyplot(fig)
-    else:
-        st.warning("Kolom 'season_x_y' atau 'cnt' tidak ditemukan untuk visualisasi pola musiman.")
+    
+    st.header("🌡 Temperature, Humidity & Rental Count")
+    if all(col in main_data_df.columns for col in ['temp', 'hum', 'cnt']):
+        color_scale = st.selectbox("Pilih Skema Warna", ["coolwarm", "viridis", "magma"])
+        fig, ax = plt.subplots(figsize=(8, 5))
+        sns.scatterplot(data=main_data_df, x='temp', y='cnt', hue='hum', palette=color_scale, s=80, ax=ax)
+        ax.set_xlabel("Temperature")
+        ax.set_ylabel("Rental Count")
+        ax.set_title("Temperature vs. Rental Count (Colored by Humidity)")
+        ax.legend(title="Humidity", bbox_to_anchor=(1.05, 1), loc="upper left")
+        st.pyplot(fig)
+    
+    # Histogram & Boxplot
+    st.header("📊 Additional Visualizations")
+    col1, col2 = st.columns(2)
+    with col1:
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.histplot(main_data_df, x='cnt', bins=30, color="#2ca02c", ax=ax)
+        ax.set_title("Histogram of Rental Count")
+        ax.set_xlabel("Rental Count")
+        ax.set_ylabel("Frequency")
+        st.pyplot(fig)
+    with col2:
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.boxplot(data=main_data_df, x='cnt', color="#d62728", ax=ax)
+        ax.set_title("Boxplot of Rental Count")
+        ax.set_xlabel("Rental Count")
+        st.pyplot(fig)
+    
+    # Clustering kategori rental
+    st.header("📌 Rental Count Categories (Clustering)")
+    bins = [0, 100, 200, 300, 400, main_data_df['cnt'].max()]
+    cluster_labels = ['Very Low', 'Low', 'Medium', 'High', 'Very High']
+    main_data_df['cnt_cluster'] = pd.cut(main_data_df['cnt'], bins=bins, labels=cluster_labels)
+    fig, ax = plt.subplots(figsize=(8, 4))
+    sns.countplot(data=main_data_df, x='cnt_cluster', order=cluster_labels, palette="mako", ax=ax)
+    ax.set_xlabel("Rental Count Category")
+    ax.set_ylabel("Number of Days")
+    ax.set_title("Distribution of Rental Count Categories")
+    st.pyplot(fig)
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     main()
