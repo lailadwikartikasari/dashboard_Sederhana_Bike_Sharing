@@ -28,8 +28,8 @@ def main():
     st.title("🚴‍♂️ Bike Sharing Dashboard")
     
     # Load data
-    main_data_df = load_data()
-    if main_data_df is None or main_data_df.empty:
+    merged_data_df = load_data()
+    if merged_data_df is None or merged_data_df.empty:
         st.warning("Data tidak tersedia atau kosong.")
         return
     
@@ -43,12 +43,12 @@ def main():
         st.sidebar.warning("Logo tidak ditemukan!")
     
     # Pilihan rentang tanggal
-    if 'dteday' in main_data_df.columns:
-        main_data_df['dteday'] = pd.to_datetime(main_data_df['dteday'], errors='coerce')
-        main_data_df = main_data_df.dropna(subset=['dteday'])
+    if 'dteday' in merged_data_df.columns:
+        merged_data_df['dteday'] = pd.to_datetime(merged_data_df['dteday'], errors='coerce')
+        merged_data_df = merged_data_df.dropna(subset=['dteday'])
         
-        min_date = main_data_df['dteday'].min()
-        max_date = main_data_df['dteday'].max()
+        min_date = merged_data_df['dteday'].min()
+        max_date = merged_data_df['dteday'].max()
         start_date, end_date = st.sidebar.date_input("Pilih Rentang Tanggal", [min_date, max_date])
         
         if start_date > end_date:
@@ -56,32 +56,32 @@ def main():
             return
         
         # Filter data berdasarkan tanggal
-        main_data_df = main_data_df[(main_data_df['dteday'] >= pd.Timestamp(start_date)) & 
-                                    (main_data_df['dteday'] <= pd.Timestamp(end_date))]
+        merged_data_df = merged_data_df[(merged_data_df['dteday'] >= pd.Timestamp(start_date)) & 
+                                    (merged_data_df['dteday'] <= pd.Timestamp(end_date))]
     
     # Pilihan musim (Season)
     season_mapping = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
-    if 'season' in main_data_df.columns:
-        main_data_df['season_cat'] = main_data_df['season'].map(season_mapping)
-        selected_season = st.sidebar.multiselect("Filter Musim", main_data_df['season_cat'].unique(), default=main_data_df['season_cat'].unique())
-        main_data_df = main_data_df[main_data_df['season_cat'].isin(selected_season)]
+    if 'season' in merged_data_df.columns:
+        merged_data_df['season_cat'] = merged_data_df['season'].map(season_mapping)
+        selected_season = st.sidebar.multiselect("Filter Musim", merged_data_df['season_cat'].unique(), default=merged_data_df['season_cat'].unique())
+        merged_data_df = merged_data_df[merged_data_df['season_cat'].isin(selected_season)]
     
     # Validasi jika dataset kosong setelah filter
-    if main_data_df.empty:
+    if merged_data_df.empty:
         st.warning("Tidak ada data setelah diterapkan filter. Silakan ubah filter Anda.")
         return
     
     # Tampilkan preview data
     st.subheader("📜 Data Preview")
-    st.write(main_data_df.head())
+    st.write(merged_data_df.head())
     
     # Pilihan agregasi
     agg_option = st.radio("Pilih Metode Agregasi", ["Rata-rata", "Total"], horizontal=True)
     
     # Visualisasi Tren Harian
     st.subheader("📆 Tren Peminjaman Sepeda Harian")
-    if 'dteday' in main_data_df.columns and 'cnt' in main_data_df.columns:
-        daily_df = main_data_df.groupby('dteday')['cnt'].mean().reset_index() if agg_option == "Rata-rata" else main_data_df.groupby('dteday')['cnt'].sum().reset_index()
+    if 'dteday' in merged_data_df.columns and 'cnt' in merged_data_df.columns:
+        daily_df = merged_data_df.groupby('dteday')['cnt'].mean().reset_index() if agg_option == "Rata-rata" else merged_data_df.groupby('dteday')['cnt'].sum().reset_index()
         y_label = "Rata-rata Peminjaman" if agg_option == "Rata-rata" else "Total Peminjaman"
         
         fig, ax = plt.subplots(figsize=(12, 5))
@@ -96,8 +96,8 @@ def main():
     
     # Visualisasi Tren Per Jam
     st.subheader("⏰ Tren Peminjaman Sepeda Per Jam")
-    if 'hr' in main_data_df.columns and 'cnt' in main_data_df.columns:
-        hourly_df = main_data_df.groupby("hr")['cnt'].mean().reset_index() if agg_option == "Rata-rata" else main_data_df.groupby("hr")['cnt'].sum().reset_index()
+    if 'hr' in merged_data_df.columns and 'cnt' in merged_data_df.columns:
+        hourly_df = merged_data_df.groupby("hr")['cnt'].mean().reset_index() if agg_option == "Rata-rata" else merged_data_df.groupby("hr")['cnt'].sum().reset_index()
         y_label = "Rata-rata Peminjaman" if agg_option == "Rata-rata" else "Total Peminjaman"
         
         fig, ax = plt.subplots(figsize=(10, 5))
@@ -117,8 +117,8 @@ def main():
     
     # Visualisasi pola musiman
     st.subheader("☁️ Apakah ada pola musiman dalam peminjaman sepeda?")
-    if 'season_cat' in main_data_df.columns and 'cnt' in main_data_df.columns:
-        seasonal_trend = main_data_df.groupby("season_cat")['cnt'].mean().sort_values()
+    if 'season_cat' in merged_data_df.columns and 'cnt' in merged_data_df.columns:
+        seasonal_trend = merged_data_df.groupby("season_cat")['cnt'].mean().sort_values()
         fig, ax = plt.subplots(figsize=(8, 5))
         seasonal_trend.plot(kind='bar', color=['green', 'orange', 'brown', 'blue'], ax=ax)
         ax.set_xlabel("Musim")
