@@ -28,9 +28,10 @@ def main():
     
     # Load data
     main_data_df = load_data()
-    if main_data_df is None:
+    if main_data_df is None or main_data_df.empty:
+        st.warning("Data tidak tersedia atau kosong.")
         return
-
+    
     # Sidebar untuk filter interaktif
     st.sidebar.header("Navigasi")
     
@@ -50,7 +51,7 @@ def main():
         # Filter data berdasarkan tanggal
         main_data_df = main_data_df[(main_data_df['dteday'] >= pd.Timestamp(start_date)) & 
                                     (main_data_df['dteday'] <= pd.Timestamp(end_date))]
-
+    
     # Pilihan musim (Season)
     season_mapping = {1: "Spring", 2: "Summer", 3: "Fall", 4: "Winter"}
     if 'season' in main_data_df.columns:
@@ -61,7 +62,7 @@ def main():
     # Tampilkan preview data
     st.subheader("📜 Data Preview")
     st.write(main_data_df.head())
-
+    
     # Pilihan agregasi
     agg_option = st.radio("Pilih Metode Agregasi", ["Rata-rata", "Total"], horizontal=True)
     
@@ -75,14 +76,18 @@ def main():
             daily_df = main_data_df.groupby('dteday')['cnt'].sum().reset_index()
             y_label = "Total Peminjaman"
         
-        fig, ax = plt.subplots(figsize=(12, 5))
-        ax.plot(daily_df['dteday'], daily_df['cnt'], marker='o', linestyle='-', color='b')
-        ax.set_xlabel("Tanggal")
-        ax.set_ylabel(y_label)
-        ax.set_title(f"Tren Peminjaman Sepeda Harian ({agg_option})")
-        plt.xticks(rotation=45)
-        plt.grid()
-        st.pyplot(fig)
+        if daily_df.empty:
+            st.warning("Tidak ada data untuk ditampilkan pada tren harian.")
+        else:
+            fig, ax = plt.subplots(figsize=(12, 5))
+            ax.plot(daily_df['dteday'], daily_df['cnt'], marker='o', linestyle='-', color='b', label=y_label)
+            ax.set_xlabel("Tanggal")
+            ax.set_ylabel(y_label)
+            ax.set_title(f"Tren Peminjaman Sepeda Harian ({agg_option})")
+            ax.legend()
+            plt.xticks(rotation=45)
+            plt.grid()
+            st.pyplot(fig)
     
     # Visualisasi Tren Per Jam
     st.subheader("⏰ Tren Peminjaman Sepeda Per Jam")
@@ -94,27 +99,33 @@ def main():
             hourly_df = main_data_df.groupby("hr")['cnt'].sum().reset_index()
             y_label = "Total Peminjaman"
         
-        fig, ax = plt.subplots(figsize=(10, 5))
-        sns.barplot(data=hourly_df, x='hr', y='cnt', palette="viridis", ax=ax)
-        ax.set_xlabel("Jam")
-        ax.set_ylabel(y_label)
-        ax.set_title(f"Tren Peminjaman Sepeda Per Jam ({agg_option})")
-        plt.xticks(range(0, 24))
-        plt.grid()
-        st.pyplot(fig)
+        if hourly_df.empty:
+            st.warning("Tidak ada data untuk ditampilkan pada tren per jam.")
+        else:
+            fig, ax = plt.subplots(figsize=(10, 5))
+            sns.barplot(data=hourly_df, x='hr', y='cnt', palette="viridis", ax=ax)
+            ax.set_xlabel("Jam")
+            ax.set_ylabel(y_label)
+            ax.set_title(f"Tren Peminjaman Sepeda Per Jam ({agg_option})")
+            plt.xticks(range(0, 24))
+            plt.grid()
+            st.pyplot(fig)
     
     # Visualisasi pola musiman
     st.subheader("☁️ Apakah ada pola musiman dalam peminjaman sepeda?")
     if 'season_cat' in main_data_df.columns and 'cnt' in main_data_df.columns:
         seasonal_trend = main_data_df.groupby("season_cat")['cnt'].mean().sort_values()
-        fig, ax = plt.subplots(figsize=(8, 5))
-        seasonal_trend.plot(kind='bar', color=['green', 'orange', 'brown', 'blue'], ax=ax)
-        ax.set_xlabel("Musim")
-        ax.set_ylabel("Rata-rata Peminjaman")
-        ax.set_title("Pola Peminjaman Sepeda Berdasarkan Musim")
-        plt.xticks(rotation=45)
-        plt.grid(axis='y')
-        st.pyplot(fig)
+        if seasonal_trend.empty:
+            st.warning("Tidak ada data untuk pola musiman.")
+        else:
+            fig, ax = plt.subplots(figsize=(8, 5))
+            seasonal_trend.plot(kind='bar', color=['green', 'orange', 'brown', 'blue'], ax=ax)
+            ax.set_xlabel("Musim")
+            ax.set_ylabel("Rata-rata Peminjaman")
+            ax.set_title("Pola Peminjaman Sepeda Berdasarkan Musim")
+            plt.xticks(rotation=45)
+            plt.grid(axis='y')
+            st.pyplot(fig)
 
 if __name__ == "__main__":
     main()
