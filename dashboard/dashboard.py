@@ -10,7 +10,7 @@ sns.set(style="whitegrid", context="talk")
 # Tentukan path absolut ke file CSV dan gambar
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(BASE_DIR, "merged_data.csv")
-logo_path = os.path.join(BASE_DIR, "logo.jpeg")
+logo_path = os.path.join(BASE_DIR, "D:/STUPEN/dashboard_Bike_Sharing/data/logo.jpeg")
 
 def load_data():
     """Load dataset dengan pengecekan error."""
