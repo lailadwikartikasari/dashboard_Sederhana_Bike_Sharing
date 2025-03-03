@@ -10,7 +10,7 @@ sns.set(style="whitegrid", context="talk")
 # Tentukan path absolut ke file CSV dan gambar
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(BASE_DIR, "merged_data.csv")
-logo_path = "https://github.com/lailadwikartikasari/dashboard_Sederhana_Bike_Sharing/blob/main/data/logo.jpg"  # Sesuaikan path jika perlu
+logo_path = "D:/STUPEN/dashboard_Bike_Sharing/data/logo.jpg"  # Sesuaikan path jika perlu
 
 def load_data():
     """Load dataset dengan pengecekan error."""
@@ -62,33 +62,43 @@ def main():
     st.subheader("📜 Data Preview")
     st.write(main_data_df.head())
 
-    # Visualisasi dan Analisis
-    st.subheader("🚴‍♂️ Bagaimana tren peminjaman sepeda secara harian dan per jam?")
-    
-    # Pilihan visualisasi
-    show_daily = st.checkbox("Tampilkan Tren Harian", value=True)
-    show_hourly = st.checkbox("Tampilkan Tren Per Jam", value=True)
+    # Pilihan agregasi
+    agg_option = st.radio("Pilih Metode Agregasi", ["Rata-rata", "Total"], horizontal=True)
     
     # Visualisasi Tren Harian
-    if show_daily and 'dteday' in main_data_df.columns and 'cnt' in main_data_df.columns:
-        day_df = main_data_df.groupby('dteday')['cnt'].sum().reset_index()
+    st.subheader("📆 Tren Peminjaman Sepeda Harian")
+    if 'dteday' in main_data_df.columns and 'cnt' in main_data_df.columns:
+        if agg_option == "Rata-rata":
+            daily_df = main_data_df.groupby('dteday')['cnt'].mean().reset_index()
+            y_label = "Rata-rata Peminjaman"
+        else:
+            daily_df = main_data_df.groupby('dteday')['cnt'].sum().reset_index()
+            y_label = "Total Peminjaman"
+        
         fig, ax = plt.subplots(figsize=(12, 5))
-        ax.plot(day_df['dteday'], day_df['cnt'], marker='o', linestyle='-', color='b')
+        ax.plot(daily_df['dteday'], daily_df['cnt'], marker='o', linestyle='-', color='b')
         ax.set_xlabel("Tanggal")
-        ax.set_ylabel("Jumlah Peminjaman")
-        ax.set_title("Tren Peminjaman Sepeda Harian")
+        ax.set_ylabel(y_label)
+        ax.set_title(f"Tren Peminjaman Sepeda Harian ({agg_option})")
         plt.xticks(rotation=45)
         plt.grid()
         st.pyplot(fig)
     
     # Visualisasi Tren Per Jam
-    if show_hourly and 'hr' in main_data_df.columns and 'cnt' in main_data_df.columns:
-        hour_df = main_data_df.groupby("hr")['cnt'].mean().reset_index()
+    st.subheader("⏰ Tren Peminjaman Sepeda Per Jam")
+    if 'hr' in main_data_df.columns and 'cnt' in main_data_df.columns:
+        if agg_option == "Rata-rata":
+            hourly_df = main_data_df.groupby("hr")['cnt'].mean().reset_index()
+            y_label = "Rata-rata Peminjaman"
+        else:
+            hourly_df = main_data_df.groupby("hr")['cnt'].sum().reset_index()
+            y_label = "Total Peminjaman"
+        
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(hour_df["hr"], hour_df["cnt"], marker='o', linestyle='-', color='r')
+        sns.barplot(data=hourly_df, x='hr', y='cnt', palette="viridis", ax=ax)
         ax.set_xlabel("Jam")
-        ax.set_ylabel("Rata-rata Peminjaman")
-        ax.set_title("Tren Peminjaman Sepeda Per Jam")
+        ax.set_ylabel(y_label)
+        ax.set_title(f"Tren Peminjaman Sepeda Per Jam ({agg_option})")
         plt.xticks(range(0, 24))
         plt.grid()
         st.pyplot(fig)
