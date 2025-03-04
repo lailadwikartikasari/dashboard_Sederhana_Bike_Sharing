@@ -99,24 +99,33 @@ def main():
 
     # Visualisasi Tren Per Jam
     st.subheader("⏰ Tren Peminjaman Sepeda Per Jam")
-    if 'hr_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
-        hourly_df = filtered_df.groupby("hr_x")['cnt_y_x'].sum().reset_index()
-        
-        fig, ax = plt.subplots(figsize=(10, 5))
-        sns.barplot(data=hourly_df, x='hr_x', y='cnt_y_x', palette="viridis", ax=ax)
-        ax.set_xlabel("Jam")
-        ax.set_ylabel("Total Peminjaman")
-        ax.set_title("Tren Peminjaman Sepeda Per Jam")
-        
-        for p in ax.patches:
-            ax.annotate(f'{int(p.get_height())}', (p.get_x() + p.get_width() / 2., p.get_height()),
-                        ha='center', va='bottom', fontsize=10, color='black', weight='bold')
 
-        plt.xticks(hourly_df['hr_x'].unique())
+    # Pastikan kolom yang diperlukan tersedia
+    if 'hr_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
+        
+        # Hitung total penyewaan sepeda per jam
+        hourly_df = filtered_df.groupby("hr_x")['cnt_y_x'].sum().reset_index()
+
+        # Hitung rata-rata penyewaan sepeda untuk setiap jam
+        hourly_trend = hourly_df.groupby('hr_x')['cnt_y_x'].mean()
+
+        # Plot tren peminjaman sepeda per jam
+        plt.figure(figsize=(8, 5))
+        plt.plot(hourly_trend.index, hourly_trend.values, marker='o', linestyle='-', markersize=8, 
+                markerfacecolor='red', markeredgecolor='black')
+
+        # Label dan judul
+        plt.xlabel('Jam')
+        plt.ylabel('Jumlah Penyewaan')
+        plt.title('Penyewaan Sepeda Berdasarkan Jam dalam Sehari')
+        plt.xticks(range(0, 24))  # Pastikan sumbu X menampilkan semua jam
         plt.grid()
-        st.pyplot(fig)
+
+        # Tampilkan plot di Streamlit
+        st.pyplot(plt)
+
     else:
-        st.warning("Kolom 'hr_x' atau 'cnt' tidak ditemukan untuk visualisasi tren per jam.")
+        st.warning("Kolom 'hr_x' atau 'cnt_y_x' tidak ditemukan dalam dataset yang digunakan.")
 
     # Visualisasi pola musiman
     st.subheader("☁️ pola antara kondisi cuaca (weathersit) dengan jumlah penyewaan sepeda (cnt)?")
