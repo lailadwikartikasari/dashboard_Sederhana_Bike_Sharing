@@ -128,7 +128,7 @@ def main():
         st.warning("Kolom 'hr_x' atau 'cnt_y_x' tidak ditemukan dalam dataset yang digunakan.")
 
     # Visualisasi pola musiman
-    st.subheader("☁️ pola antara kondisi cuaca (weathersit) dengan jumlah penyewaan sepeda (cnt)?")
+    st.subheader("☁️ Apakah kondisi cuaca berpengaruh terhadap jumlah penyewaan sepeda?")
 
     # Mapping kondisi cuaca
     weathersit_mapping = {1: "Clear", 2: "Mist", 3: "Light Rain/Snow", 4: "Heavy Rain/Snow"}
@@ -136,8 +136,8 @@ def main():
 
     # Periksa apakah kolom yang diperlukan ada dalam DataFrame
     if 'weathersit_y_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
-        # Kelompokkan data berdasarkan kondisi cuaca dan hitung rata-rata peminjaman
-        seasonal_trend = filtered_df.groupby("weathersit_y_x")['cnt_y_x'].mean().sort_values()
+        # Kelompokkan data berdasarkan kondisi cuaca dan hitung Jumlah peminjaman
+        seasonal_trend = filtered_df.groupby("weathersit_y_x")['cnt_y_x'].sum().sort_values()
         
         # Ubah indeks ke nama kondisi cuaca yang lebih jelas
         seasonal_trend.index = seasonal_trend.index.map(weathersit_mapping)
@@ -149,7 +149,7 @@ def main():
         fig, ax = plt.subplots(figsize=(8, 5))
         seasonal_trend.plot(kind='bar', color=colors, ax=ax)
         ax.set_xlabel("Kondisi Cuaca")  # Perbaikan label sumbu X
-        ax.set_ylabel("Rata-rata Peminjaman")
+        ax.set_ylabel("Jumlah Peminjaman")
         ax.set_title("Pola Peminjaman Sepeda Berdasarkan Kondisi Cuaca")
         plt.xticks(rotation=45)
         plt.grid(axis='y')
