@@ -106,8 +106,8 @@ def main():
         # Hitung total penyewaan sepeda per jam
         hourly_df = filtered_df.groupby("hr_x")['cnt_y_x'].sum().reset_index()
 
-        # Hitung rata-rata penyewaan sepeda untuk setiap jam
-        hourly_trend = hourly_df.groupby('hr_x')['cnt_y_x'].mean()
+        # Hitung Jumlah penyewaan sepeda untuk setiap jam
+        hourly_trend = hourly_df.groupby('hr_x')['cnt_y_x'].sum()
 
         # Plot tren peminjaman sepeda per jam
         plt.figure(figsize=(8, 5))
