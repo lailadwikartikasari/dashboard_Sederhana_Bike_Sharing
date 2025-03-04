@@ -65,7 +65,7 @@ def main():
     st.write(filtered_df.head())
 
     # Visualisasi Tren Harian
-    st.subheader("📆 Tren Peminjaman Sepeda Harian")
+    st.subheader("📆 Penyewaan Sepeda Berdasarkan Hari dalam Seminggu")
 
     # Pastikan kolom yang diperlukan tersedia
     if 'dteday_y_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
@@ -98,7 +98,7 @@ def main():
         st.warning("Kolom 'dteday_y_x' atau 'cnt_y_x' tidak ditemukan dalam dataset yang digunakan.")
 
     # Visualisasi Tren Per Jam
-    st.subheader("⏰ Tren Peminjaman Sepeda Per Jam")
+    st.subheader("⏰ Penyewaan Sepeda Berdasarkan Jam dalam Sehari")
 
     # Pastikan kolom yang diperlukan tersedia
     if 'hr_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
