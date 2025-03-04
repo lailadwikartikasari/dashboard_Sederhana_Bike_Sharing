@@ -77,7 +77,7 @@ def main():
         daily_df['day_of_week'] = pd.to_datetime(daily_df['dteday_y_x']).dt.day_name()
 
         # Hitung rata-rata penyewaan per hari dalam seminggu
-        daily_trend = daily_df.groupby('day_of_week')['cnt_y_x'].mean()
+        daily_trend = daily_df.groupby('day_of_week')['cnt_y_x'].sum()
 
         # Urutkan sesuai dengan urutan hari dalam seminggu
         days_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
