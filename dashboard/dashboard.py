@@ -107,13 +107,13 @@ def main():
 
     # Mapping kondisi cuaca dengan emoji
     weathersit_mapping = {
-        1: "☀️ Clear", 
-        2: "🌫️ Mist", 
-        3: "🌧️ Light Rain/Snow", 
-        4: "⛈️ Heavy Rain/Snow"
+        1: " Clear", 
+        2: " Mist", 
+        3: "Light Rain/Snow", 
+        4: " Heavy Rain/Snow"
     }
 
-    color_mapping = {"☀️ Clear": "green", "🌫️ Mist": "orange", "🌧️ Light Rain/Snow": "red", "⛈️ Heavy Rain/Snow": "blue"}
+    color_mapping = {"Clear": "green", "Mist": "orange", "Light Rain/Snow": "red", "Heavy Rain/Snow": "blue"}
 
     # Periksa apakah kolom yang diperlukan ada dalam DataFrame
     if 'weathersit_y_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
