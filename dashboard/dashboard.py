@@ -66,20 +66,36 @@ def main():
 
     # Visualisasi Tren Harian
     st.subheader("📆 Tren Peminjaman Sepeda Harian")
+
+    # Pastikan kolom yang diperlukan tersedia
     if 'dteday_y_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
+        
+        # Hitung total penyewaan sepeda per hari
         daily_df = filtered_df.groupby('dteday_y_x')['cnt_y_x'].sum().reset_index()
         
-        fig, ax = plt.subplots(figsize=(12, 5))
-        ax.plot(daily_df['dteday_y_x'], daily_df['cnt_y_x'], marker='o', linestyle='-', color='b', label="Total Peminjaman")
-        ax.set_xlabel("Tanggal")
-        ax.set_ylabel("Total Peminjaman")
-        ax.set_title("Tren Peminjaman Sepeda Harian")
-        ax.legend()
-        plt.xticks(rotation=45)
+        # Tambahkan kolom nama hari
+        daily_df['day_of_week'] = pd.to_datetime(daily_df['dteday_y_x']).dt.day_name()
+
+        # Hitung rata-rata penyewaan per hari dalam seminggu
+        daily_trend = daily_df.groupby('day_of_week')['cnt_y_x'].mean()
+
+        # Urutkan sesuai dengan urutan hari dalam seminggu
+        days_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        daily_trend = daily_trend.reindex(days_order)
+
+        # Plot tren peminjaman sepeda per hari dalam seminggu
+        plt.figure(figsize=(8, 5))
+        plt.plot(daily_trend.index, daily_trend.values, marker='o', linestyle='-', markersize=8, markerfacecolor='red', markeredgecolor='black')
+        plt.xlabel('Hari')
+        plt.ylabel('Jumlah Penyewaan')
+        plt.title('Penyewaan Sepeda Berdasarkan Hari dalam Seminggu')
         plt.grid()
-        st.pyplot(fig)
+
+        # Tampilkan plot di Streamlit
+        st.pyplot(plt)
+
     else:
-        st.warning("Kolom 'dteday' atau 'cnt' tidak ditemukan untuk visualisasi tren harian.")
+        st.warning("Kolom 'dteday_y_x' atau 'cnt_y_x' tidak ditemukan dalam dataset yang digunakan.")
 
     # Visualisasi Tren Per Jam
     st.subheader("⏰ Tren Peminjaman Sepeda Per Jam")
