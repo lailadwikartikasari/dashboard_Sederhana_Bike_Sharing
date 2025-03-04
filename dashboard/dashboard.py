@@ -103,16 +103,10 @@ def main():
         st.warning("Kolom 'hr_x' atau 'cnt' tidak ditemukan untuk visualisasi tren per jam.")
 
     # Visualisasi pola musiman
-    st.subheader("☁️ Pola antara kondisi cuaca (weathersit) dengan jumlah penyewaan sepeda (cnt) 🚴‍♂️")
+    st.subheader("☁️ pola antara kondisi cuaca (weathersit) dengan jumlah penyewaan sepeda (cnt)?")
 
-    # Mapping kondisi cuaca dengan emoji
-    weathersit_mapping = {
-        1: " Clear", 
-        2: " Mist", 
-        3: "Light Rain/Snow", 
-        4: " Heavy Rain/Snow"
-    }
-
+    # Mapping kondisi cuaca
+    weathersit_mapping = {1: "Clear", 2: "Mist", 3: "Light Rain/Snow", 4: "Heavy Rain/Snow"}
     color_mapping = {"Clear": "green", "Mist": "orange", "Light Rain/Snow": "red", "Heavy Rain/Snow": "blue"}
 
     # Periksa apakah kolom yang diperlukan ada dalam DataFrame
@@ -129,7 +123,7 @@ def main():
         # Membuat plot
         fig, ax = plt.subplots(figsize=(8, 5))
         seasonal_trend.plot(kind='bar', color=colors, ax=ax)
-        ax.set_xlabel("Kondisi Cuaca")  
+        ax.set_xlabel("Kondisi Cuaca")  # Perbaikan label sumbu X
         ax.set_ylabel("Rata-rata Peminjaman")
         ax.set_title("Pola Peminjaman Sepeda Berdasarkan Kondisi Cuaca")
         plt.xticks(rotation=45)
@@ -137,7 +131,6 @@ def main():
 
         # Tampilkan plot di Streamlit
         st.pyplot(fig)
-
 
     else:
         st.warning("Kolom 'weathersit_y_x' atau 'cnt_y_x' tidak ditemukan untuk visualisasi pola peminjaman berdasarkan cuaca.")
