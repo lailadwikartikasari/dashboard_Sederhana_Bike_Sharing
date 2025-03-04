@@ -104,8 +104,8 @@ def main():
 
     # Visualisasi pola musiman
     st.subheader("☁️ Apakah ada pola musiman dalam peminjaman sepeda?")
-    if 'season_x_y' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
-        seasonal_trend = filtered_df.groupby("season_x_y")['cnt_y_x'].mean().sort_values()
+    if 'weathersit_y_x' in filtered_df.columns and 'cnt_y_x' in filtered_df.columns:
+        seasonal_trend = filtered_df.groupby("weathersit_y_x")['cnt_y_x'].mean().sort_values()
         fig, ax = plt.subplots(figsize=(8, 5))
         seasonal_trend.plot(kind='bar', color=['green', 'orange', 'brown', 'blue'], ax=ax)
         ax.set_xlabel("Musim")
